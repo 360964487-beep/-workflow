@@ -466,10 +466,15 @@ body[data-theme="monochrome"] .toolbar select{border-color:#e2e2e0;background:#f
                 if (targetBlock && blockDragSrcIndex !== null) {
                     const targetIdx = parseInt(targetBlock.dataset.index);
                     if (blockDragSrcIndex !== targetIdx) {
-                        const [moved] = blocks.splice(blockDragSrcIndex, 1);
-                        blocks.splice(targetIdx, 0, moved);
-                        renderMainBlocks(blocks);
+                        // Capture live editor DOM before rerendering, or unsaved content is lost.
                         syncCurrentDocFromUI();
+                        const currentDoc = getCurrentDocument();
+                        const currentBlocks = currentDoc?.mainBlocks;
+                        if (currentBlocks) {
+                            const [moved] = currentBlocks.splice(blockDragSrcIndex, 1);
+                            currentBlocks.splice(targetIdx, 0, moved);
+                            renderMainBlocks(currentBlocks);
+                        }
                         saveToLocalStorage(false);
                         showToast("块顺序已更新", 1000);
                     }
